@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOGS READ BY NOCTAMBULO</title>
+    <link rel="shortcut icon" href="gordo.jpg" type="image/x-icon">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #0d1117;
+            color: #c9d1d9;
+        }
+        h2 {
+            color: #58a6ff;
+        }
+        input, button, textarea {
+            margin: 10px 0;
+            width: 100%;
+            max-width: 400px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #30363d;
+            background-color: #161b22;
+            color: #c9d1d9;
+        }
+        textarea {
+            height: 200px;
+            resize: none;
+        }
+        button {
+            background-color: #238636;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2ea043;
+        }
+        #status {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #8b949e;
+        }
+        footer {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #8b949e;
+        }
+        #menu {
+            margin-top: 20px;
+            background-color: #161b22;
+            padding: 10px;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 400px;
+        }
+        #menu a {
+            display: block;
+            color: #58a6ff;
+            text-decoration: none;
+            margin: 5px 0;
+        }
+        #menu a:hover {
+            color: #238636;
+        }
+    </style>
+</head>
+<body>
+    <h2>Separador de Logs</h2>
+    <input type="file" id="fileInput" accept=".txt">
+    <input type="text" id="filterText" placeholder="Ingresa el texto a filtrar (por ejemplo, 'steam')">
+    <button onclick="processFile()">Procesar Archivo</button>
+    <textarea id="output" placeholder="Aquí aparecerán las líneas filtradas..." readonly></textarea>
+    <button onclick="copyText()">Copiar Texto</button>
+    <button onclick="downloadText()">Descargar como .txt</button>
+    <div id="status"></div>
+
+    <!-- Menú de últimos pastes -->
+    <div id="menu">
+        <h3>Últimos Pastes</h3>
+        <div id="pastList"></div>
+    </div>
+
+    <footer>Desarrollado por NOCTA</footer>
+
+    <script>
+        function processFile() {
+            const fileInput = document.getElementById('fileInput');
+            const filterText = document.getElementById('filterText').value.toLowerCase();
+            const output = document.getElementById('output');
+            const status = document.getElementById('status');
+
+            if (fileInput.files.length === 0) {
+                alert('Por favor, selecciona un archivo .txt.');
+                return;
+            }
+
+            if (!filterText) {
+                alert('Por favor, ingresa un texto para filtrar.');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            const startTime = performance.now();
+
+            reader.onload = function(e) {
+                const lines = e.target.result.split('\n');
+                const filteredLines = lines.filter(line => line.toLowerCase().includes(filterText));
+                const endTime = performance.now();
+                const timeTaken = (endTime - startTime).toFixed(2);
+
+                output.value = filteredLines.join('\n');
+                status.innerText = `Encontradas ${filteredLines.length} líneas que contienen "${filterText}". Tiempo de procesamiento: ${timeTaken} ms.`;
+
+                // Guardar en el almacenamiento local
+                savePaste(filteredLines);
+            };
+
+            reader.readAsText(file);
+        }
+
+        function savePaste(filteredLines) {
+            const pastes = JSON.parse(localStorage.getItem('pastes') || '[]');
+            const pasteId = 'paste_' + Math.random().toString(36).substr(2, 9); // Generar un ID aleatorio
+            pastes.unshift({ id: pasteId, content: filteredLines.join('\n') }); // Agregar el nuevo paste con ID aleatorio
+            if (pastes.length > 5) { // Mantener solo los 5 últimos
+                pastes.pop();
+            }
+            localStorage.setItem('pastes', JSON.stringify(pastes));
+            displayPastes();
+        }
+
+        function displayPastes() {
+            const pastList = document.getElementById('pastList');
+            const pastes = JSON.parse(localStorage.getItem('pastes') || '[]');
+            pastList.innerHTML = '';
+            pastes.forEach(paste => {
+                const pasteElement = document.createElement('a');
+                pasteElement.href = '#';
+                pasteElement.textContent = `ID: ${paste.id}`;
+                pasteElement.onclick = function() {
+                    downloadPaste(paste.id, paste.content); // Llamar a la función de descarga
+                };
+                pastList.appendChild(pasteElement);
+            });
+        }
+
+        function downloadPaste(pasteId, content) {
+            const blob = new Blob([content], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${pasteId}.txt`; // Usar el ID como nombre de archivo
+            link.click(); // Descargar el archivo automáticamente
+        }
+
+        function copyText() {
+            const output = document.getElementById('output');
+            output.select();
+            document.execCommand('copy');
+            alert('Texto copiado al portapapeles.');
+        }
+
+        function downloadText() {
+            const output = document.getElementById('output').value;
+            const blob = new Blob([output], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'filtrado.txt';
+            link.click();
+        }
+
+        // Mostrar los últimos pastes cuando la página se cargue
+        window.onload = function() {
+            displayPastes();
+        };
+    </script>
+</body>
+</html>

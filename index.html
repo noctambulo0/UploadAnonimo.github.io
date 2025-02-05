@@ -81,6 +81,48 @@
             background-color: #238636;
             border-radius: 5px;
         }
+        #updateButton {
+            background-color: #58a6ff;
+            color: white;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+        #updateButton:hover {
+            background-color: #238636;
+        }
+        /* Estilo del menú de actualizaciones */
+        #updateMenu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #161b22;
+            color: #c9d1d9;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 300px;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
+        }
+        #updateMenu h3 {
+            margin-top: 0;
+            color: #58a6ff;
+        }
+        #closeUpdateMenu {
+            background-color: transparent;
+            border: none;
+            color: #c9d1d9;
+            font-size: 20px;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        #closeUpdateMenu:hover {
+            color: #58a6ff;
+        }
     </style>
 </head>
 <body>
@@ -101,6 +143,20 @@
     <div id="menu">
         <h3>Últimos Pastes</h3>
         <div id="pastList"></div>
+    </div>
+
+    <!-- Botón de actualizaciones -->
+    <button id="updateButton" onclick="showUpdateMenu()">Ver Actualizaciones</button>
+
+    <!-- Menú de actualizaciones -->
+    <div id="updateMenu">
+        <button id="closeUpdateMenu" onclick="closeUpdateMenu()">×</button>
+        <h3>Actualizaciones Recientes</h3>
+        <ul id="updateList">
+            <li>Actualización 1: Se ha añadido la barra de progreso.</li>
+            <li>Actualización 2: Ahora el archivo se procesa en fragmentos.</li>
+            <li>Actualización 3: Se mejoró el rendimiento con archivos grandes.</li>
+        </ul>
     </div>
 
     <footer>Desarrollado por NOCTA</footer>
@@ -213,6 +269,15 @@
             link.href = URL.createObjectURL(blob);
             link.download = 'filtrado.txt';
             link.click();
+        }
+
+        // Funciones para manejar el menú de actualizaciones
+        function showUpdateMenu() {
+            document.getElementById('updateMenu').style.display = 'block';
+        }
+
+        function closeUpdateMenu() {
+            document.getElementById('updateMenu').style.display = 'none';
         }
 
         window.onload = function() {

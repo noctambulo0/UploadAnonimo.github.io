@@ -68,6 +68,20 @@
         #menu a:hover {
             color: #238636;
         }
+        /* Estilos para la barra de progreso */
+        #progressContainer {
+            width: 100%;
+            max-width: 400px;
+            margin-top: 10px;
+            background-color: #30363d;
+            border-radius: 5px;
+        }
+        #progressBar {
+            height: 10px;
+            background-color: #238636;
+            border-radius: 5px;
+            width: 0;
+        }
     </style>
 </head>
 <body>
@@ -79,6 +93,11 @@
     <button onclick="copyText()">Copiar Texto</button>
     <button onclick="downloadText()">Descargar como .txt</button>
     <div id="status"></div>
+
+    <!-- Barra de progreso -->
+    <div id="progressContainer">
+        <div id="progressBar"></div>
+    </div>
 
     <!-- Menú de últimos pastes -->
     <div id="menu">
@@ -94,6 +113,7 @@
             const filterText = document.getElementById('filterText').value.toLowerCase();
             const output = document.getElementById('output');
             const status = document.getElementById('status');
+            const progressBar = document.getElementById('progressBar');
 
             if (fileInput.files.length === 0) {
                 alert('Por favor, selecciona un archivo .txt.');
@@ -111,7 +131,20 @@
 
             reader.onload = function(e) {
                 const lines = e.target.result.split('\n');
-                const filteredLines = lines.filter(line => line.toLowerCase().includes(filterText));
+                const totalLines = lines.length;
+                let filteredLines = [];
+
+                // Leer las líneas una por una y actualizar la barra de progreso
+                lines.forEach((line, index) => {
+                    if (line.toLowerCase().includes(filterText)) {
+                        filteredLines.push(line);
+                    }
+
+                    // Actualizar la barra de progreso
+                    const progress = ((index + 1) / totalLines) * 100;
+                    progressBar.style.width = progress + '%';
+                });
+
                 const endTime = performance.now();
                 const timeTaken = (endTime - startTime).toFixed(2);
 

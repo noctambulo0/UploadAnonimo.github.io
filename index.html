@@ -68,19 +68,18 @@
         #menu a:hover {
             color: #238636;
         }
-        /* Estilos para la barra de progreso */
-        #progressContainer {
+        #progressBar {
             width: 100%;
             max-width: 400px;
-            margin-top: 10px;
+            height: 20px;
             background-color: #30363d;
             border-radius: 5px;
+            margin-top: 10px;
         }
-        #progressBar {
-            height: 10px;
+        #progressBar div {
+            height: 100%;
             background-color: #238636;
             border-radius: 5px;
-            width: 0;
         }
     </style>
 </head>
@@ -93,10 +92,9 @@
     <button onclick="copyText()">Copiar Texto</button>
     <button onclick="downloadText()">Descargar como .txt</button>
     <div id="status"></div>
-
     <!-- Barra de progreso -->
-    <div id="progressContainer">
-        <div id="progressBar"></div>
+    <div id="progressBar">
+        <div id="progress"></div>
     </div>
 
     <!-- Menú de últimos pastes -->
@@ -113,7 +111,8 @@
             const filterText = document.getElementById('filterText').value.toLowerCase();
             const output = document.getElementById('output');
             const status = document.getElementById('status');
-            const progressBar = document.getElementById('progressBar');
+            const progressBar = document.getElementById('progress');
+            const progress = document.getElementById('progress');
 
             if (fileInput.files.length === 0) {
                 alert('Por favor, selecciona un archivo .txt.');
@@ -127,42 +126,50 @@
 
             const file = fileInput.files[0];
             const reader = new FileReader();
-            const startTime = performance.now();
+            const chunkSize = 1024 * 1024; // 1 MB por fragmento
+            const totalChunks = Math.ceil(file.size / chunkSize);
+            let currentChunk = 0;
+            let filteredLines = [];
 
             reader.onload = function(e) {
                 const lines = e.target.result.split('\n');
-                const totalLines = lines.length;
-                let filteredLines = [];
+                filteredLines = filteredLines.concat(lines.filter(line => line.toLowerCase().includes(filterText)));
 
-                // Leer las líneas una por una y actualizar la barra de progreso
-                lines.forEach((line, index) => {
-                    if (line.toLowerCase().includes(filterText)) {
-                        filteredLines.push(line);
-                    }
+                currentChunk++;
 
-                    // Actualizar la barra de progreso
-                    const progress = ((index + 1) / totalLines) * 100;
-                    progressBar.style.width = progress + '%';
-                });
+                // Actualizar barra de progreso
+                const progressPercentage = (currentChunk / totalChunks) * 100;
+                progress.style.width = progressPercentage + '%';
 
-                const endTime = performance.now();
-                const timeTaken = (endTime - startTime).toFixed(2);
-
-                output.value = filteredLines.join('\n');
-                status.innerText = `Encontradas ${filteredLines.length} líneas que contienen "${filterText}". Tiempo de procesamiento: ${timeTaken} ms.`;
-
-                // Guardar en el almacenamiento local
-                savePaste(filteredLines);
+                // Si no quedan fragmentos por procesar, mostrar el resultado
+                if (currentChunk < totalChunks) {
+                    readNextChunk();
+                } else {
+                    output.value = filteredLines.join('\n');
+                    const endTime = performance.now();
+                    const timeTaken = (endTime - startTime).toFixed(2);
+                    status.innerText = `Encontradas ${filteredLines.length} líneas que contienen "${filterText}". Tiempo de procesamiento: ${timeTaken} ms.`;
+                    savePaste(filteredLines);
+                }
             };
 
-            reader.readAsText(file);
+            function readNextChunk() {
+                const startByte = currentChunk * chunkSize;
+                const endByte = Math.min(startByte + chunkSize, file.size);
+                const blob = file.slice(startByte, endByte);
+                reader.readAsText(blob);
+            }
+
+            // Comenzar a leer el primer fragmento
+            const startTime = performance.now();
+            readNextChunk();
         }
 
         function savePaste(filteredLines) {
             const pastes = JSON.parse(localStorage.getItem('pastes') || '[]');
-            const pasteId = 'paste_' + Math.random().toString(36).substr(2, 9); // Generar un ID aleatorio
-            pastes.unshift({ id: pasteId, content: filteredLines.join('\n') }); // Agregar el nuevo paste con ID aleatorio
-            if (pastes.length > 5) { // Mantener solo los 5 últimos
+            const pasteId = 'paste_' + Math.random().toString(36).substr(2, 9);
+            pastes.unshift({ id: pasteId, content: filteredLines.join('\n') });
+            if (pastes.length > 5) {
                 pastes.pop();
             }
             localStorage.setItem('pastes', JSON.stringify(pastes));
@@ -178,7 +185,7 @@
                 pasteElement.href = '#';
                 pasteElement.textContent = `ID: ${paste.id}`;
                 pasteElement.onclick = function() {
-                    downloadPaste(paste.id, paste.content); // Llamar a la función de descarga
+                    downloadPaste(paste.id, paste.content);
                 };
                 pastList.appendChild(pasteElement);
             });
@@ -188,8 +195,8 @@
             const blob = new Blob([content], { type: 'text/plain' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `${pasteId}.txt`; // Usar el ID como nombre de archivo
-            link.click(); // Descargar el archivo automáticamente
+            link.download = `${pasteId}.txt`;
+            link.click();
         }
 
         function copyText() {
@@ -208,7 +215,6 @@
             link.click();
         }
 
-        // Mostrar los últimos pastes cuando la página se cargue
         window.onload = function() {
             displayPastes();
         };

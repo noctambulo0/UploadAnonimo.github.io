@@ -32,6 +32,20 @@
         button:hover {
             background-color: #2ea043;
         }
+        #menu {
+            display: none;
+            position: absolute;
+            background: #161b22;
+            border: 1px solid #30363d;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: left;
+        }
+        #menu button {
+            display: block;
+            width: 100%;
+            margin: 5px 0;
+        }
     </style>
 </head>
 <body>
@@ -39,6 +53,12 @@
     <input type="file" id="fileInput" accept=".txt" multiple>
     <input type="text" id="filterText" placeholder="Ingresa el texto a filtrar">
     <button onclick="processFiles()">Procesar Archivos</button>
+    <button onclick="toggleMenu()">🔍 Filtros Avanzados</button>
+    <div id="menu">
+        <button onclick="buscar('streaming')">Streaming</button>
+        <button onclick="buscar('gaming')">Gaming</button>
+        <button onclick="buscar('social')">Redes Sociales</button>
+    </div>
     <textarea id="output" placeholder="Aquí aparecerán las líneas filtradas..." readonly></textarea>
     <button onclick="copyText()">Copiar Texto</button>
     <button onclick="downloadText()">Descargar como .txt</button>
@@ -91,6 +111,49 @@
             link.href = URL.createObjectURL(blob);
             link.download = 'filtrado.txt';
             link.click();
+        }
+
+        function toggleMenu() {
+            let menu = document.getElementById("menu");
+            menu.style.display = (menu.style.display === "block") ? "none" : "block";
+        }
+
+        function buscar(tipo) {
+            let palabrasClave = {
+                "streaming": ["netflix", "twitch", "hulu", "primevideo", "disneyplus"],
+                "gaming": ["steam", "riotgames", "epicgames", "playstation", "xbox"],
+                "social": ["twitter", "facebook", "instagram", "tiktok", "linkedin"]
+            };
+
+            const fileInput = document.getElementById('fileInput');
+            const output = document.getElementById('output');
+            output.value = "";
+
+            if (fileInput.files.length === 0) {
+                alert('Por favor, selecciona al menos un archivo.');
+                return;
+            }
+
+            let allFilteredLines = [];
+            let filesProcessed = 0;
+
+            Array.from(fileInput.files).slice(0, 5).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const lines = e.target.result.split('\n');
+                    const filteredLines = lines.filter(line => 
+                        palabrasClave[tipo].some(palabra => line.toLowerCase().includes(palabra))
+                    );
+                    allFilteredLines = allFilteredLines.concat(filteredLines);
+                    filesProcessed++;
+                    if (filesProcessed === Math.min(fileInput.files.length, 5)) {
+                        output.value = allFilteredLines.join('\n');
+                    }
+                };
+                reader.readAsText(file);
+            });
+
+            toggleMenu(); // Cierra el menú después de seleccionar
         }
     </script>
 </body>

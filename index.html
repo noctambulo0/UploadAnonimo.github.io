@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -42,7 +43,6 @@
     <textarea id="output" placeholder="Aquí aparecerán las líneas filtradas..." readonly></textarea>
     <button onclick="copyText()">Copiar Texto</button>
     <button onclick="downloadText()">Descargar como .txt</button>
-
     <script>
         function processFiles() {
             const fileInput = document.getElementById('fileInput');
@@ -67,13 +67,7 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const lines = e.target.result.split('\n');
-                    const filteredLines = lines
-                        .filter(line => line.toLowerCase().includes(filterText))
-                        .map(line => {
-                            const parts = line.split(':');
-                            return parts.length >= 3 ? `${parts[1]}:${parts[2]}` : line; 
-                        });
-
+                    const filteredLines = lines.filter(line => line.toLowerCase().includes(filterText));
                     allFilteredLines = allFilteredLines.concat(filteredLines);
                     filesProcessed++;
                     if (filesProcessed === Math.min(fileInput.files.length, 5)) {

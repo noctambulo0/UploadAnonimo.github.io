@@ -43,16 +43,6 @@
     <button onclick="copyText()">Copiar Texto</button>
     <button onclick="downloadText()">Descargar como .txt</button>
     <script>
-        const headerText = `
-𝙉Ѳ𝘾𝙏Δ𝙈𝘽𝙐𝙇Ѳ 𝙇Ѳ𝙂𝙎
-
-T̳E̳L̳E̳G̳R̳A̳M̳:̳ https://t.me/NoctaPaste
-D̳I̳S̳C̳O̳R̳D̳:̳ https://discord.gg/cnbNG365mP
-
-B̳U̳Y̳ P̳R̳I̳V̳A̳T̳E̳ L̳O̳G̳S̳:̳ https://t.me/Noctambulosinflow
-
-`;
-
         function processFiles() {
             const fileInput = document.getElementById('fileInput');
             const filterText = document.getElementById('filterText').value.toLowerCase();
@@ -96,7 +86,11 @@ B̳U̳Y̳ P̳R̳I̳V̳A̳T̳E̳ L̳O̳G̳S̳:̳ https://t.me/Noctambulosinflow
 
         function downloadText() {
             const output = document.getElementById('output').value;
-            const blob = new Blob([headerText + output], { type: 'text/plain' });
+            const header = "𝙉Ѳ𝘾𝙏Δ𝙈𝘽𝙐𝙇Ѳ 𝙇Ѳ𝙂𝙎\n\n" +
+                           "T̳E̳L̳E̳G̳R̳A̳M̳: ̳https://t.me/NoctaPaste\n" +
+                           "D̳I̳S̳C̳O̳R̳D̳:̳ https://discord.gg/cnbNG365mP\n\n" +
+                           "B̳U̳Y̳ P̳R̳I̳V̳A̳T̳E̳ L̳O̳G̳S̳: ̳https://t.me/Noctambulosinflow\n\n";
+            const blob = new Blob([header + output], { type: 'text/plain' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = 'filtrado.txt';

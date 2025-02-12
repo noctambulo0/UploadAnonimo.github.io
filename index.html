@@ -65,12 +65,12 @@
             Array.from(fileInput.files).slice(0, 5).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const lines = e.target.result.split('\n');
+                    const lines = e.target.result.split(/\r?\n/); // Mantener formato original
                     const filteredLines = lines.filter(line => line.toLowerCase().includes(filterText));
                     allFilteredLines = allFilteredLines.concat(filteredLines);
                     filesProcessed++;
                     if (filesProcessed === Math.min(fileInput.files.length, 5)) {
-                        output.value = allFilteredLines.join('\n');
+                        output.value = allFilteredLines.join("\n");
                     }
                 };
                 reader.readAsText(file);
@@ -86,11 +86,21 @@
 
         function downloadText() {
             const output = document.getElementById('output').value;
-            const header = "𝙉Ѳ𝘾𝙏Δ𝙈𝘽𝙐𝙇Ѳ 𝙇Ѳ𝙂𝙎\n\n" +
-                           "T̳E̳L̳E̳G̳R̳A̳M̳: ̳https://t.me/NoctaPaste\n" +
-                           "D̳I̳S̳C̳O̳R̳D̳:̳ https://discord.gg/cnbNG365mP\n\n" +
-                           "B̳U̳Y̳ P̳R̳I̳V̳A̳T̳E̳ L̳O̳G̳S̳: ̳https://t.me/Noctambulosinflow\n\n";
-            const blob = new Blob([header + output], { type: 'text/plain' });
+            if (!output.trim()) {
+                alert("No hay contenido para descargar.");
+                return;
+            }
+
+            // Encabezado que se agregará al inicio del archivo
+            const header = `𝙉Ѳ𝘾𝙏Δ𝙈𝘽𝙐𝙇Ѳ 𝙇Ѳ𝙂𝙎 \n
+T̳E̳L̳E̳G̳R̳A̳M̳: ̳https://t.me/NoctaPaste\n
+D̳I̳S̳C̳O̳R̳D̳:̳ https://discord.gg/cnbNG365mP\n
+B̳U̳Y̳ P̳R̳I̳V̳A̳T̳E̳ L̳O̳G̳S̳: ̳https://t.me/Noctambulosinflow\n\n`;
+
+            // Unir el encabezado con los logs
+            const finalText = header + output.replace(/\r?\n/g, "\r\n"); // Mantener los saltos de línea correctamente
+
+            const blob = new Blob([finalText], { type: 'text/plain' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = 'filtrado.txt';

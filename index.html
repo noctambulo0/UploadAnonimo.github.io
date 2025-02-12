@@ -58,6 +58,7 @@
         <button onclick="buscar('streaming')">Streaming</button>
         <button onclick="buscar('gaming')">Gaming</button>
         <button onclick="buscar('social')">Redes Sociales</button>
+        <button onclick="buscar('dinero')">Redes Sociales</button>
     </div>
     <textarea id="output" placeholder="Aquí aparecerán las líneas filtradas..." readonly></textarea>
     <button onclick="copyText()">Copiar Texto</button>
@@ -120,9 +121,10 @@
 
         function buscar(tipo) {
             let palabrasClave = {
-                "streaming": ["netflix", "twitch", "hulu", "primevideo", "disneyplus"],
-                "gaming": ["steam", "riotgames", "epicgames", "playstation", "xbox"],
-                "social": ["twitter", "facebook", "instagram", "tiktok", "linkedin"]
+                "streaming": ["netflix", "twitch", "hulu", "primevideo", "disneyplus", "pornhub.com", "onlyfans.com"],
+                "gaming": ["steam", "riotgames", "epicgames", "playstation", "xbox", "kogama.com", "habbo." "osu.ppy", ],
+                "social": ["twitter", "facebook", "instagram", "tiktok", "linkedin", "snapchat.com"],
+                "dinero": ["bankofamerica", "galicia.com", "binance.com", "icbc-ltd.com", "cdb.com.cn"]
             };
 
             const fileInput = document.getElementById('fileInput');
